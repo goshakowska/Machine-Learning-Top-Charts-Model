@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # service.py
 
 from flask import Flask, Response, jsonify
@@ -9,7 +10,8 @@ def run_prediction(model_type, tracks_per_list):
         ...
     elif model_type == "base":
         ...
-    ...
+    else:
+        raise ValueError("Invalid model type")
 
 
 def create_application() -> Flask:
@@ -17,7 +19,7 @@ def create_application() -> Flask:
 
     @app.route("/", methods=["GET"])
     def index():
-        return ...  # documentation
+        return "Hello World!"
 
     @app.route("/predict/model/<model_type>/<int:tracks_per_list>", methods=["GET"])
     def predict_model(model_type, tracks_per_list):
