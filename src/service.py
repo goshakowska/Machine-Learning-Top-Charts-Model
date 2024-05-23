@@ -5,13 +5,13 @@ from flask import Flask, Response, jsonify
 import json
 
 
-def run_prediction(model_type, tracks_per_list):
+def run_prediction(model_type: str, tracks_per_list: int):
     if model_type == "advanced":
         ...
     elif model_type == "base":
         ...
     else:
-        raise ValueError("Invalid model type")
+        raise ValueError(f"Invalid model type: {model_type}")
 
 
 def create_application() -> Flask:
@@ -22,7 +22,7 @@ def create_application() -> Flask:
         return "Hello World!"
 
     @app.route("/predict/model/<model_type>/<int:tracks_per_list>", methods=["GET"])
-    def predict_model(model_type, tracks_per_list):
+    def predict_model(model_type: str, tracks_per_list: int):
         ...
         try:
             run_prediction(model_type, tracks_per_list)
@@ -31,7 +31,7 @@ def create_application() -> Flask:
             return jsonify({'error': str(e)}), 400
 
     @app.route("/send_data/<data_type>", methods=["POST"])
-    def send_data(data_type):
+    def send_data(data_type: str):
         ...
         return jsonify({"data_type": data_type})
 
