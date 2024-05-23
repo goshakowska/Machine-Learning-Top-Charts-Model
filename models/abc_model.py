@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class AbstractModel(ABC):
     """
     Abstract class for all models.
