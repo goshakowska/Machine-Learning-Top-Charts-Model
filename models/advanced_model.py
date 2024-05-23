@@ -5,10 +5,11 @@ from sklearn .linear_model import HuberRegressor
 from datetime import datetime, timedelta
 import pandas as pd
 
+from models.abc_model import AbstractModel
 from src.data.prepare_datasets import get_dataframe
 
 
-class AdvancedModel:
+class AdvancedModel(AbstractModel):
     def __init__(self, parameters=None):
         self.parameters = parameters
         self.model = HuberRegressor(**(parameters if parameters else {}))
