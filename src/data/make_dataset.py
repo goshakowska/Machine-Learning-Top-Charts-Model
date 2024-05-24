@@ -1,30 +1,50 @@
-# -*- coding: utf-8 -*-
-import click
-import logging
-from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+import pandas as pd
+# from pandas import DataFrame
+# import os
+
+# # Determine the base directory relative to the current file's location
+# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+
+# # Define the data directories relative to the base directory
+# DATA_DIR = os.path.join(BASE_DIR, "data")
+# RAW_DATA_DIR = os.path.join(DATA_DIR, "raw", "Z04_T69_V2")
+# PROCESSED_DATA_DIR = os.path.join(DATA_DIR, "processed")
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+def load_data(file_path):
+    return pd.read_json(file_path, lines=True)
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+def prepare_dataset(session_file, tracks_file, artists_file):
+    # Load data from JSON lines files
+    session_df = load_data(session_file)
+    tracks_df = load_data(tracks_file)
+    artists_df = load_data(artists_file)
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+    filtered_session_df = session_df[session_df['event_type'].isin(['play', 'like'])]
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+    track_counts = filtered_session_df['track_id'].value_counts().reset_index()
+    track_counts.columns = ['track_id', 'play_count']
 
-    main()
+    tracks_df = tracks_df.rename(columns={'id': 'track_id', 'name': 'track_name'})
+    artists_df = artists_df.rename(columns={'id': 'artist_id', 'name': 'artist_name'})
+
+    track_info = track_counts.merge(tracks_df[['track_id', 'track_name', 'id_artist']], left_on='track_id', right_on='track_id', how='left')
+    full_info = track_info.merge(artists_df[['artist_id', 'artist_name', 'genres']], left_on='id_artist', right_on='artist_id', how='left')
+
+    final_df = full_info[['track_id', 'play_count', 'track_name', 'id_artist', 'artist_name', 'genres']]
+
+    return final_df
+
+
+# def main():
+#     session_file = os.path.join(RAW_DATA_DIR, "sessions.jsonl")
+#     tracks_file = os.path.join(RAW_DATA_DIR, "tracks.jsonl")
+#     artists_file = os.path.join(RAW_DATA_DIR, "artists.jsonl")
+
+#     top_tracks_df = prepare_dataset(session_file, tracks_file, artists_file)
+#     top_tracks_df.to_json(os.path.join(PROCESSED_DATA_DIR, "top_tracks.jsonl"), orient='records', lines=True)
+
+
+# if __name__ == "__main__":
+#     main()

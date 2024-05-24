@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 # service.py
 
-from flask import Flask, Response, jsonify
+from flask import Flask, jsonify
 from src.models_functions import train_model
+from models.base_model import predict_with_base_model
 
 
-def run_prediction(model_type: str, tracks_per_list: int):
+def run_prediction(model_type: str, tracks_per_list: int, music_genre: str):
     if model_type == "advanced":
         result = train_model.train_advanced_model(tracks_per_list)
         return result
     elif model_type == "base":
-        ...
+        result = predict_with_base_model(tracks_per_list, music_genre)
     else:
         raise ValueError(f"Invalid model type: {model_type}")
 
@@ -22,10 +23,11 @@ def create_application() -> Flask:
     def index():
         return "Hello World!"
 
-    @app.route("/predict/model/<model_type>/<int:tracks_per_list>", methods=["GET"])
-    def predict_model(model_type: str, tracks_per_list: int):
+    @app.route("/train/model/<model_type>/<int:tracks_per_list>", methods=["GET"])
+    @app.route("/predict/model/<model_type>/<int:tracks_per_list>/<music_genre>", methods=["GET"], defaults={"music_genre": None})
+    def predict_model(model_type: str, tracks_per_list: int, music_genre: str = None):
         try:
-            result = run_prediction(model_type, tracks_per_list)
+            result = run_prediction(model_type, tracks_per_list, music_genre)
             result = result.to_dict()
             return jsonify({"model_type": model_type, "tracks_per_list": tracks_per_list, "result": result})
         except Exception as e:

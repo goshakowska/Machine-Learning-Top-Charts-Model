@@ -1,6 +1,6 @@
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
-from sklearn .linear_model import HuberRegressor
+from sklearn.linear_model import HuberRegressor
 import numpy as np
 from models.abc_model import AbstractModel
 
