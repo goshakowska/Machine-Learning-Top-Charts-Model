@@ -12,7 +12,7 @@ class AbstractModel(ABC):
         Get the hyperparameters suited for the model.
         """
         ...
-    
+
     @abstractmethod
     def fit(self, X, y):
         """

@@ -32,21 +32,32 @@ def validate_provided_data(X: DataFrame) -> None:
 
 
 def process_data(X: DataFrame) -> DataFrame:
-        """
-        Processes the provided data by filtering the songs based on the last 3 weeks of listening history.
-        Parameters:
-            X (DataFrame): The data to be processed.
-        Returns:
-            None
-        """
-        X['timestamp'] = pd.to_datetime(X['timestamp'])
-        three_weeks_ago = datetime.now() - timedelta(weeks=3)
-        recent_data = X[X['timestamp'] >= three_weeks_ago]
-        return recent_data
+    """
+    Processes the provided data by filtering the songs based on the last 3 weeks of listening history.
+    Parameters:
+        X (DataFrame): The data to be processed.
+    Returns:
+        None
+    """
+    X['timestamp'] = pd.to_datetime(X['timestamp'])
+    three_weeks_ago = datetime.now() - timedelta(weeks=3)
+    recent_data = X[X['timestamp'] >= three_weeks_ago]
+    return recent_data
 
 
 def prepare_dataset(session_file, tracks_file, artists_file):
-    # Load data from JSON lines files
+    """
+    Prepares a dataset by loading session, tracks, and artists data, validating the provided session data,
+    processing the data, filtering the session data, counting the number of plays for each track,
+    renaming columns in tracks and artists data, merging the dataframes, and returning a final dataframe
+    with track information, play count, track name, artist id, artist name, and genres.
+    Parameters:
+        session_file (str): The path to the session data file.
+        tracks_file (str): The path to the tracks data file.
+        artists_file (str): The path to the artists data file.
+    Returns:
+        pandas.DataFrame: A dataframe with track information, play count, track name, artist id, artist name, and genres.
+    """
     session_df = load_data(session_file)
     tracks_df = load_data(tracks_file)
     artists_df = load_data(artists_file)
