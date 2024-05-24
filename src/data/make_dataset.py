@@ -1,18 +1,48 @@
 import pandas as pd
-# from pandas import DataFrame
-# import os
+from pandas import DataFrame
+import os
+from datetime import datetime, timedelta
 
 # # Determine the base directory relative to the current file's location
-# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
-# # Define the data directories relative to the base directory
-# DATA_DIR = os.path.join(BASE_DIR, "data")
-# RAW_DATA_DIR = os.path.join(DATA_DIR, "raw", "Z04_T69_V2")
-# PROCESSED_DATA_DIR = os.path.join(DATA_DIR, "processed")
+# Define the data directories relative to the base directory
+DATA_DIR = os.path.join(BASE_DIR, "data")
+RAW_DATA_DIR = os.path.join(DATA_DIR, "raw", "Z04_T69_V2")
+PROCESSED_DATA_DIR = os.path.join(DATA_DIR, "processed")
 
 
 def load_data(file_path):
     return pd.read_json(file_path, lines=True)
+
+
+def validate_provided_data(X: DataFrame) -> None:
+    """
+    Validates the provided data by checking if it is a pandas DataFrame.
+    Parameters:
+        X (DataFrame): The data to be validated.
+    Returns:
+        None
+    Raises:
+        TypeError: If the provided data is not a pandas DataFrame.
+    """
+    necessary_attributes = {"track_id", "event_type", "timestamp"}
+    if not necessary_attributes.issubset(X.columns):
+        raise ValueError("Provided data doesn't contain necessary attributes.")
+
+
+def process_data(X: DataFrame) -> DataFrame:
+        """
+        Processes the provided data by filtering the songs based on the last 3 weeks of listening history.
+        Parameters:
+            X (DataFrame): The data to be processed.
+        Returns:
+            None
+        """
+        X['timestamp'] = pd.to_datetime(X['timestamp'])
+        three_weeks_ago = datetime.now() - timedelta(weeks=3)
+        recent_data = X[X['timestamp'] >= three_weeks_ago]
+        return recent_data
 
 
 def prepare_dataset(session_file, tracks_file, artists_file):
@@ -20,6 +50,10 @@ def prepare_dataset(session_file, tracks_file, artists_file):
     session_df = load_data(session_file)
     tracks_df = load_data(tracks_file)
     artists_df = load_data(artists_file)
+
+    validate_provided_data(session_df)
+
+    session_df = process_data(session_df)
 
     filtered_session_df = session_df[session_df['event_type'].isin(['play', 'like'])]
 
@@ -37,14 +71,15 @@ def prepare_dataset(session_file, tracks_file, artists_file):
     return final_df
 
 
-# def main():
-#     session_file = os.path.join(RAW_DATA_DIR, "sessions.jsonl")
-#     tracks_file = os.path.join(RAW_DATA_DIR, "tracks.jsonl")
-#     artists_file = os.path.join(RAW_DATA_DIR, "artists.jsonl")
+def main():
+    session_file = os.path.join(RAW_DATA_DIR, "sessions.jsonl")
+    tracks_file = os.path.join(RAW_DATA_DIR, "tracks.jsonl")
+    artists_file = os.path.join(RAW_DATA_DIR, "artists.jsonl")
 
-#     top_tracks_df = prepare_dataset(session_file, tracks_file, artists_file)
-#     top_tracks_df.to_json(os.path.join(PROCESSED_DATA_DIR, "top_tracks.jsonl"), orient='records', lines=True)
+    top_tracks_df = prepare_dataset(session_file, tracks_file, artists_file)
+
+    top_tracks_df.to_json(os.path.join(PROCESSED_DATA_DIR, "top_tracks.jsonl"), orient='records', lines=True)
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

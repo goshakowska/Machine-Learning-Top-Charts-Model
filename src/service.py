@@ -3,7 +3,7 @@
 
 from flask import Flask, jsonify
 from src.models_functions import train_model
-from models.base_model import predict_with_base_model
+from models.base_model import BaseModel
 
 
 def run_prediction(model_type: str, tracks_per_list: int, music_genre: str):
@@ -11,7 +11,9 @@ def run_prediction(model_type: str, tracks_per_list: int, music_genre: str):
         result = train_model.train_advanced_model(tracks_per_list)
         return result
     elif model_type == "base":
-        result = predict_with_base_model(tracks_per_list, music_genre)
+        base_model = BaseModel(tracks_per_list, music_genre)
+        result = base_model.predict()
+        return result
     else:
         raise ValueError(f"Invalid model type: {model_type}")
 
@@ -23,7 +25,7 @@ def create_application() -> Flask:
     def index():
         return "Hello World!"
 
-    @app.route("/train/model/<model_type>/<int:tracks_per_list>", methods=["GET"])
+    @app.route("/predict/model/<model_type>/<int:tracks_per_list>", methods=["GET"])
     @app.route("/predict/model/<model_type>/<int:tracks_per_list>/<music_genre>", methods=["GET"], defaults={"music_genre": None})
     def predict_model(model_type: str, tracks_per_list: int, music_genre: str = None):
         try:

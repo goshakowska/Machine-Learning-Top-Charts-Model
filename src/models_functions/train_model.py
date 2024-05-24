@@ -77,7 +77,6 @@ def train_advanced_model(tracks_per_list):
 
     top_tracks = latest_month_features_df.sort_values(
         by='predicted_monthly_plays', ascending=False).head(tracks_per_list)
-    print(top_tracks[['name', 'predicted_monthly_plays']])
     top_tracks["rank"] = range(1, len(top_tracks) + 1)
-
+    print(top_tracks[['rank', 'name', 'predicted_monthly_plays']])
     return top_tracks[["rank", "name"]]
