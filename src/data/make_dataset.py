@@ -3,10 +3,10 @@ from pandas import DataFrame
 import os
 from datetime import datetime, timedelta
 
-# # Determine the base directory relative to the current file's location
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
-# Define the data directories relative to the base directory
+
 DATA_DIR = os.path.join(BASE_DIR, "data")
 RAW_DATA_DIR = os.path.join(DATA_DIR, "raw", "Z04_T69_V2")
 PROCESSED_DATA_DIR = os.path.join(DATA_DIR, "processed")
