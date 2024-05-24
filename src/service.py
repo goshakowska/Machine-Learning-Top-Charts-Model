@@ -2,12 +2,13 @@
 # service.py
 
 from flask import Flask, Response, jsonify
-import json
+from src.models_functions import train_model
 
 
 def run_prediction(model_type: str, tracks_per_list: int):
     if model_type == "advanced":
-        ...
+        result = train_model.train_advanced_model(tracks_per_list)
+        return result
     elif model_type == "base":
         ...
     else:
@@ -23,16 +24,15 @@ def create_application() -> Flask:
 
     @app.route("/predict/model/<model_type>/<int:tracks_per_list>", methods=["GET"])
     def predict_model(model_type: str, tracks_per_list: int):
-        ...
         try:
-            run_prediction(model_type, tracks_per_list)
-            return jsonify({"model_type": model_type, "tracks_per_list": tracks_per_list})
+            result = run_prediction(model_type, tracks_per_list)
+            result = result.to_dict()
+            return jsonify({"model_type": model_type, "tracks_per_list": tracks_per_list, "result": result})
         except Exception as e:
             return jsonify({'error': str(e)}), 400
 
     @app.route("/send_data/<data_type>", methods=["POST"])
     def send_data(data_type: str):
-        ...
         return jsonify({"data_type": data_type})
 
     return app
