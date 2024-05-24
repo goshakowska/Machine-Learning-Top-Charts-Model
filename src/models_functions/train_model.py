@@ -14,6 +14,7 @@ def filter_first_three_weeks(df):
 
 def train_advanced_model(tracks_per_list):
     sessions_df = get_dataframe("sessions")
+    artists_df = get_dataframe("artists")
     tracks_df = get_dataframe("tracks")
 
     merged_df = pd.merge(tracks_df, sessions_df, left_on='id', right_on='track_id')
@@ -78,5 +79,10 @@ def train_advanced_model(tracks_per_list):
     top_tracks = latest_month_features_df.sort_values(
         by='predicted_monthly_plays', ascending=False).head(tracks_per_list)
     top_tracks["rank"] = range(1, len(top_tracks) + 1)
-    print(top_tracks[['rank', 'name', 'predicted_monthly_plays']])
-    return top_tracks[["rank", "name"]]
+
+    top_tracks = top_tracks.rename(columns={'name': 'track_name', 'id': 'track_id'})
+    artists_df = artists_df.rename(columns={'artist_id': 'id', 'name': 'artist_name'})
+
+    top_tracks = pd.merge(top_tracks, artists_df, left_on='id_artist', right_on='id', how='left')
+    print(top_tracks[['rank', 'track_name', 'artist_name', 'predicted_monthly_plays']])
+    return top_tracks[["rank", "track_name", "artist_name"]]
